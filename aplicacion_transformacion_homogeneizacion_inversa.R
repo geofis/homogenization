@@ -1,16 +1,25 @@
-d <- read.csv('/home/jr/Documentos/tendenciashomogeneizacion/datos_ocoa_para_RHT.csv', header = F)
+library(car)
+## Not run:
+source("RHtestsV4_20130719.r") #http://etccdi.pacificclimate.org/software.shtml
+## End(Not run)
+tdir <- tempdir()
+setwd(tdir)
+ghsource <- 'https://raw.githubusercontent.com/geofis/homogenization/master/'
+fname <- 'datos_ocoa_para_RHT.csv'
+download.file(paste0(ghsource, 'sampledata/', fname), fname)
+d <- read.csv(fname, header = F)
+head(d)
 lam <- powerTransform(d$V4+0.01)$lambda
 d$trans <- bcPower(d$V4+0.01, lam)
 dev.new();hist(d$trans)
 dev.new();qqnorm(d$trans)
 shapiro.test(d$trans)
-#homogeneizar
-dprht <-d[,-4]
-write.table(dprht, '/home/jr/Descargas/b2/out2/dprht.csv', row.names = F, col.names = F, sep = ',')
-source('/home/jr/Documentos/proyecto_FONDOCyT/bibliografia/homogeneizacion_relleno_datos_series_temporales_climaticas_MICHELA/Estadistica/R/RHtestsV4.r/RHtestsV4.r')
-FindU(InSeries = '/home/jr/Descargas/b2/out2/dprht.csv', MissingValueCode = "NA", output = "/home/jr/Descargas/b2/out2/")
-#No hay changepoints, por lo tanto, la serie homogeneizada mostrara los mismos valores que la transformada que se uso como insumo en FindU
-hom <- read.table('/home/jr/Descargas/b2/out2/_U.dat')
-#La transformacion inversa obtiene los valores originales
-d$inversa <- (hom$V9*lam + 1)^(1/lam) - 0.01
-summary(d$V4-d$inversa)
+#Find changepoints
+dprht <-d[,-4]#Prepare the data
+write.table(dprht, 'dprht.csv', row.names = F, col.names = F, sep = ',')
+FindU(InSeries = 'dprht.csv', MissingValueCode = "NA", output = 'homogenized')
+#In this case there are no changepoints, so in the homogenized series will show the same values as the input series, which is also the transformed one
+hom <- read.table('homogenized_U.dat')
+#The inverse transformation shows the same values as the original series
+d$inverse <- (hom$V9*lam + 1)^(1/lam) - 0.01
+summary(d$V4-d$inverse)
