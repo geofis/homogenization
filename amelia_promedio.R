@@ -8,6 +8,7 @@ system.time(
     logs = "gdp_pc" #La variable gdp_pc se transforma logaritmicamente, pero esto no aplica en datos ya transformados
   )
 )
+# Tiempo en segundos
 #   user  system elapsed 
 #  4.924   0.060   4.936 
 
@@ -21,6 +22,7 @@ system.time(
       )
     )/length(a.out$imputations)
 )
+# Tiempo en segundos
 #  user  system elapsed 
 # 0.284   0.000   0.286 
 
