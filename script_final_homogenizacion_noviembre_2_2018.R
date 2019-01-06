@@ -10,10 +10,15 @@ library(car)
 library(nortest)
 library(Amelia)
 
+#Extract numbers from strings
 numextract <- function(string){
-str_extract(string, "\\-*\\d+\\.*\\d*")
+  str_extract(string, "\\-*\\d+\\.*\\d*")
+}
 
-d <- read_xlsx("D:\\Documentos Tesis\\imputaciones_ocoa_bani\\Solicitud de la uasd.xlsx", sheet = 2, col_names = F)
+#Read data
+##Locally
+# d <- read_xlsx("D:\\Documentos Tesis\\imputaciones_ocoa_bani\\Solicitud de la uasd.xlsx", sheet = 2, col_names = F)
+
 d <- as.data.frame
 anos <- numextract(sapply(d, function(x) grep('DATOS DIARIOS', x, value = T))[[1]])
 inicioano <- grep('^DIA.*$', d[,1])
