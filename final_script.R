@@ -1,4 +1,4 @@
-#Paquetes
+#PAQUETES
 library(readxl)
 library(stringr)
 library(reshape2)
@@ -11,76 +11,55 @@ library(car)
 library(nortest)
 library(Amelia)
 
-#Organizar tablas de ONAMET en segun lo requerido por Amelia
-##Extraer numeros
+#ORGANIZAR TABLAS DE ONAMET SEGUN LO REQUERIDO POR RHTest
+##Tomado de: https://gist.github.com/geofis/1dbac27f612eef8a40ed599d4181ac1c
+##Funcion "Extraer numeros"
 numextract <- function(string){
   str_extract(string, "\\-*\\d+\\.*\\d*")
 }
-  
-d <- read_xlsx("D:\\Documentos Tesis\\imputaciones_ocoa_bani\\Solicitud de la uasd.xlsx", sheet = 2, col_names = F)
-d <- as.data.frame
-anos <- numextract(sapply(d, function(x) grep('DATOS DIARIOS', x, value = T))[[1]])
+##Datos de ONAMET. Descargar y abrir
+setwd(tempdir()) #FIJAR UN DIRECTORIO DE TRABAJO TEMPORAL
+download.file("http://geografiafisica.org/r/onamet/tstonamet.xlsx", 'tstonamet.xlsx') #DESCARGA EL ARCHIVO ZIP Y LO NOMBRA COMO TEMPORAL
+setwd(directorio)
+d <- read_xlsx("tstonamet.xlsx", sheet = 1, col_names = F)
+d <- as.data.frame(d)
+##Anios
+anos <- sort(
+  numextract(
+    melt(
+      sapply(
+        d,
+        function(x) grep('DATOS DIARIOS', x, value = T)
+        )
+      )$value
+    )
+  )
+##Rangos de datos
+Sys.setlocale(locale="en_GB.UTF-8")
 inicioano <- grep('^DIA.*$', d[,1])
-finano <- grep('^TOTAL.*$', d[,1])
+finano <- grep('^TOTAL$', d[,1])
 rdat <- data.frame(anos, inicioano, finano)
 seqdias <- seq.Date(as.Date(paste0(rdat$anos[1],'/1/1')), as.Date(paste0(rdat$anos[nrow(rdat)],'/12/31')), 'days')
 seqtable <- data.frame(year=year(seqdias), month=months(seqdias), day=day(seqdias))
-seqtable
+seqtable <- as.data.frame(sapply(seqtable, as.character), stringsAsFactors = F)
 datos <- sapply(levels(rdat$anos), function(x) d[(rdat[rdat$anos==x,'inicioano']+1):(rdat[rdat$anos==x,'finano']-1), 1:13], simplify = F)
 datos <- melt(datos)
 colnames(datos) <- c('day',month.name, 'year')
-datos
+datos #Visualizacion de resultado
+##Reorganizacion segun requerido por RHTest. "INAP" a "0", "-" a NA
 datos <- datos %>% gather(month, value, -day, -year)
-datos
-str(datos)
-str(seqtable)
-datos$day
-unique(datos$day)
-length(unique(datos$day))
-length(unique(datos$month))
-unique(datos$month)
-unique(datos$year)
-sapply(seqtable, as.character)
-as.data.frame(sapply(seqtable, as.character))
-seqtable <- as.data.frame(sapply(seqtable, as.character))
-seqtable
-str(datos)
-str(seqtable)
-?as.data.frame
-seqtable <- data.frame(year=year(seqdias), month=months(seqdias), day=day(seqdias))
-seqtable <- as.data.frame(sapply(seqtable, as.character), stringsAsFactors = F)
-str(seqtable)
-str(datos)
-merge(seqtable, datos, all.x=T)
-datoscalendario <- merge(seqtable, datos, all.x=T)
-str(datoscalendario)
-unique(datoscalendario$value)
-sort(unique(datoscalendario$value))
-gsub('INAP','0', (datoscalendario$value))
-unique(gsub('INAP','0', (datoscalendario$value)))
-sort(unique(gsub('INAP','0', (datoscalendario$value))))
+datoscalendario <- merge(seqtable, datos, all.x=T, sort = F)
 datoscalendario$value <- gsub('INAP','0', datoscalendario$value)
-gsub('-','NA', datoscalendario$value)
-sort(unique(gsub('-','NA', datoscalendario$value)))
-as.numeric(gsub('-','NA', datoscalendario$value))
-as.numeric(gsub('-','NA', datoscalendario$value))
+datoscalendario$value <- gsub('-','NA', datoscalendario$value)
 datoscalendario$value <- as.numeric(datoscalendario$value)
+datoscalendario$fecha <- as.Date(with(datoscalendario, paste0(day,'/',month,'/', year)), format = '%d/%B/%Y')
 datoscalendario
-is.na(datoscalendario$value)
-which(is.na(datoscalendario$value))
-datoscalendario[which(is.na(datoscalendario$value)),]
-datoscalendario
-sapply(datoscalendario, as.Date)
-with(datoscalendario, paste0(day,'/',month,'/', year))
-as.Date(with(datoscalendario, paste0(day,'/',month,'/', year)))
-as.Date(with(datoscalendario, paste0(day,'/',month,'/', year)), format = '%d %B %Y')
-with(datoscalendario, paste0(day,'/',month,'/', year))
-as.Date(with(datoscalendario, paste0(day,'/',month,'/', year)), format = '%D %B %Y')
-as.Date(with(datoscalendario, paste0(day,'/',month,'/', year)), format = '%d %B %Y')
-as.Date(with(datoscalendario, paste0(day,'/',month,'/', year)), format = '%d %b %Y')
-with(datoscalendario, paste0(day,'/',month,'/', year))
-as.Date(with(datoscalendario, paste0(day,'/',month,'/', year)), format = '%d/%B/%Y')
-sort(as.Date(with(datoscalendario, paste0(day,'/',month,'/', year)), format = '%d/%B/%Y'))
+View(datoscalendario)
+#Guardar resultado en disco. Descomentar si fuese necesario
+# write.csv(datoscalendario, 'datoscalendario.csv')
+
+
+#INICIO HOMOGENEIZACION
 datosR<-read.csv("D:/Documentos Tesis/tablas_bani_ocoa_depuradas/TABLAS_ESTACIONES_DEPURADAS/Rancho_Arriba_rhtest.csv", header=T)
 head(datosR)
 Ra<-datosR
