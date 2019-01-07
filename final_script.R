@@ -1,3 +1,4 @@
+#Paquetes
 library(readxl)
 library(stringr)
 library(reshape2)
@@ -10,56 +11,58 @@ library(car)
 library(nortest)
 library(Amelia)
 
+#Organizar tablas de ONAMET en segun lo requerido por Amelia
+##Extraer numeros
 numextract <- function(string){
   str_extract(string, "\\-*\\d+\\.*\\d*")
 }
   
-  d <- read_xlsx("D:\\Documentos Tesis\\imputaciones_ocoa_bani\\Solicitud de la uasd.xlsx", sheet = 2, col_names = F)
-  d <- as.data.frame
-  anos <- numextract(sapply(d, function(x) grep('DATOS DIARIOS', x, value = T))[[1]])
-  inicioano <- grep('^DIA.*$', d[,1])
-  finano <- grep('^TOTAL.*$', d[,1])
-  rdat <- data.frame(anos, inicioano, finano)
-  seqdias <- seq.Date(as.Date(paste0(rdat$anos[1],'/1/1')), as.Date(paste0(rdat$anos[nrow(rdat)],'/12/31')), 'days')
-  seqtable <- data.frame(year=year(seqdias), month=months(seqdias), day=day(seqdias))
-  seqtable
-  datos <- sapply(levels(rdat$anos), function(x) d[(rdat[rdat$anos==x,'inicioano']+1):(rdat[rdat$anos==x,'finano']-1), 1:13], simplify = F)
-  datos <- melt(datos)
-  colnames(datos) <- c('day',month.name, 'year')
-  datos
-  datos <- datos %>% gather(month, value, -day, -year)
-  datos
-  str(datos)
-  str(seqtable)
-  datos$day
-  unique(datos$day)
-  length(unique(datos$day))
-  length(unique(datos$month))
-  unique(datos$month)
-  unique(datos$year)
-  sapply(seqtable, as.character)
-  as.data.frame(sapply(seqtable, as.character))
-  seqtable <- as.data.frame(sapply(seqtable, as.character))
-  seqtable
-  str(datos)
-  str(seqtable)
-  ?as.data.frame
-  seqtable <- data.frame(year=year(seqdias), month=months(seqdias), day=day(seqdias))
-  seqtable <- as.data.frame(sapply(seqtable, as.character), stringsAsFactors = F)
-  str(seqtable)
-  str(datos)
-  merge(seqtable, datos, all.x=T)
-  datoscalendario <- merge(seqtable, datos, all.x=T)
-  str(datoscalendario)
-  unique(datoscalendario$value)
-  sort(unique(datoscalendario$value))
-  gsub('INAP','0', (datoscalendario$value))
-  unique(gsub('INAP','0', (datoscalendario$value)))
-  sort(unique(gsub('INAP','0', (datoscalendario$value))))
-  datoscalendario$value <- gsub('INAP','0', datoscalendario$value)
-  gsub('-','NA', datoscalendario$value)
-  sort(unique(gsub('-','NA', datoscalendario$value)))
-  as.numeric(gsub('-','NA', datoscalendario$value)))
+d <- read_xlsx("D:\\Documentos Tesis\\imputaciones_ocoa_bani\\Solicitud de la uasd.xlsx", sheet = 2, col_names = F)
+d <- as.data.frame
+anos <- numextract(sapply(d, function(x) grep('DATOS DIARIOS', x, value = T))[[1]])
+inicioano <- grep('^DIA.*$', d[,1])
+finano <- grep('^TOTAL.*$', d[,1])
+rdat <- data.frame(anos, inicioano, finano)
+seqdias <- seq.Date(as.Date(paste0(rdat$anos[1],'/1/1')), as.Date(paste0(rdat$anos[nrow(rdat)],'/12/31')), 'days')
+seqtable <- data.frame(year=year(seqdias), month=months(seqdias), day=day(seqdias))
+seqtable
+datos <- sapply(levels(rdat$anos), function(x) d[(rdat[rdat$anos==x,'inicioano']+1):(rdat[rdat$anos==x,'finano']-1), 1:13], simplify = F)
+datos <- melt(datos)
+colnames(datos) <- c('day',month.name, 'year')
+datos
+datos <- datos %>% gather(month, value, -day, -year)
+datos
+str(datos)
+str(seqtable)
+datos$day
+unique(datos$day)
+length(unique(datos$day))
+length(unique(datos$month))
+unique(datos$month)
+unique(datos$year)
+sapply(seqtable, as.character)
+as.data.frame(sapply(seqtable, as.character))
+seqtable <- as.data.frame(sapply(seqtable, as.character))
+seqtable
+str(datos)
+str(seqtable)
+?as.data.frame
+seqtable <- data.frame(year=year(seqdias), month=months(seqdias), day=day(seqdias))
+seqtable <- as.data.frame(sapply(seqtable, as.character), stringsAsFactors = F)
+str(seqtable)
+str(datos)
+merge(seqtable, datos, all.x=T)
+datoscalendario <- merge(seqtable, datos, all.x=T)
+str(datoscalendario)
+unique(datoscalendario$value)
+sort(unique(datoscalendario$value))
+gsub('INAP','0', (datoscalendario$value))
+unique(gsub('INAP','0', (datoscalendario$value)))
+sort(unique(gsub('INAP','0', (datoscalendario$value))))
+datoscalendario$value <- gsub('INAP','0', datoscalendario$value)
+gsub('-','NA', datoscalendario$value)
+sort(unique(gsub('-','NA', datoscalendario$value)))
+as.numeric(gsub('-','NA', datoscalendario$value))
 as.numeric(gsub('-','NA', datoscalendario$value))
 datoscalendario$value <- as.numeric(datoscalendario$value)
 datoscalendario
