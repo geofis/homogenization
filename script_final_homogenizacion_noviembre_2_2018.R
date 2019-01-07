@@ -11,8 +11,7 @@ library(nortest)
 library(Amelia)
 
 numextract <- function(string){
-  str_extract(string, "\\-*\\d+\\.*\\d*")
-}
+  str_extract(string, "\\-*\\d+\\.*\\d*")}
 
 d <- read_xlsx("D:\\Documentos Tesis\\imputaciones_ocoa_bani\\Solicitud de la uasd.xlsx", sheet = 2, col_names = F)
 d <- as.data.frame
