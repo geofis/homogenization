@@ -18,9 +18,9 @@ numextract <- function(string){
   str_extract(string, "\\-*\\d+\\.*\\d*")
 }
 ##Datos de ONAMET. Descargar y abrir
-setwd(tempdir()) #FIJAR UN DIRECTORIO DE TRABAJO TEMPORAL
+directorio <- tempdir()
+setwd(directorio) #FIJAR UN DIRECTORIO DE TRABAJO TEMPORAL
 download.file("http://geografiafisica.org/r/onamet/tstonamet.xlsx", 'tstonamet.xlsx') #DESCARGA EL ARCHIVO ZIP Y LO NOMBRA COMO TEMPORAL
-setwd(directorio)
 d <- read_xlsx("tstonamet.xlsx", sheet = 1, col_names = F)
 d <- as.data.frame(d)
 ##Anios
